@@ -7,9 +7,14 @@ class FindMyBusiness extends React.Component {
     this.state = {
       name: '',
       zip: '', 
+      address: '',
+      phone: '',
+      website: '',
+      cateogory: {}
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleChange = this.handleChange.bind(this)
   }
 
   handleSubmit(event) {
@@ -22,7 +27,19 @@ class FindMyBusiness extends React.Component {
     this.setState(formData);
   }
 
+  handleChange(mapResult) {
+    this.setState({
+      address: mapResult.formatted_address,
+      name: mapResult.name,
+      category: mapResult.types,
+      phone: mapResult.formatted_phone_number,
+      website: mapResult.website
+    });
+  }
+
   render() {
+    let renderMap = this.state.name && this.state.zip;
+    
     return (
       <div className='entry'>
         <form onSubmit={this.handleSubmit}>
@@ -36,8 +53,14 @@ class FindMyBusiness extends React.Component {
           </label>
             <input type="submit" value="Submit" />
         </form>
-        { this.state.name && this.state.zip &&
-          <GoogleMap name={this.state.name} zip={this.state.zip} />
+        { renderMap &&
+          <div>
+            <GoogleMap name={this.state.name} zip={this.state.zip} resultsHandler={this.handleChange} />
+            <h3>{this.state.name}</h3>
+            <p>Address: {this.state.address}</p>
+            <p>Phone: {this.state.phone}</p>
+            <p>Website: {this.state.website}</p>
+          </div>
         }
       </div>
     )

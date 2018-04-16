@@ -3,6 +3,10 @@ import React from 'react';
 class GoogleMap extends React.Component {
 	constructor(props) {
     super(props);
+    this.state = {
+      result: {}, 
+      query: {}
+    }
   }
 
   componentDidMount() {
@@ -23,45 +27,59 @@ class GoogleMap extends React.Component {
     });
 
     this.geocoder = new google.maps.Geocoder();
-    this.renderMap()
+    this.renderMap();
   }
 
-  componentDidUpdate() {
-    this.renderMap()
+  componentDidUpdate(prevProps, prevState) {
+    let sameName = this.props.name === prevProps.name;
+    let sameZip = this.props.zip === prevProps.zip;
+    
+    if (!(sameName && sameZip)) {
+      this.renderMap();
+    }
   }
 
   renderMap(map) {
-    if (this.props.name) {
-      let service = new google.maps.places.PlacesService(this.map)
-        service.textSearch({
-          query: this.props.name + ' ' + this.props.zip
-        }, (results) => {
-          console.log(results);
-          this.getResults(results)
-        });
-        service.getDetails({
-          placeId: 'AIzaSyAzu1D8v-7FaPvVhKYqykGYpMc1WwZ70Mk'
-        }, (results) => {
-          // console.log(results);
-        });
-      }
+    let service = new google.maps.places.PlacesService(this.map)
+      service.textSearch({
+        query: this.props.name + ' ' + this.props.zip
+      }, (results) => {
+        if (results) {
+          var request = {placeId: results[0].place_id}
+          service.getDetails(request, (result, status) => {
+            if (status !== google.maps.places.PlacesServiceStatus.OK) {
+              console.error(status);
+              return;
+            }
+            else {
+              this.getResults(result)
+              console.log('success')
+            }
+          });
+        }
+      });
   }
 
-  getResults(results) {
-    let address = results[0].formatted_address;
-    this.geocoder.geocode({'address': address}, (results, status) => {
-      if (status === 'OK') {
-        this.map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-          map: this.map,
-          position: results[0].geometry.location
-        });
-      }
-    })
+  getResults(result) {
+    if (result && (result != this.state.result)) {
+      let address = result.formatted_address;
+      this.geocoder.geocode({'address': address}, (results, status) => {
+        if (status === 'OK') {
+          this.map.setCenter(result.geometry.location);
+          var marker = new google.maps.Marker({
+            map: this.map,
+            position: result.geometry.location
+          });
+        }
+      });
+      this.setState({result: result}, () => {
+        this.props.resultsHandler(this.state.result)
+      });
+    }
   }
 
   render() {
-    const {name, zip} = this.props;
+    const {name, zip, resultsHandler} = this.props;
 
     return (
         <div ref="map" className='map' />
