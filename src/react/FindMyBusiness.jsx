@@ -1,5 +1,6 @@
 import React from 'react';
 import GoogleMap from './GoogleMap.jsx'
+import _ from 'lodash';
 
 class FindMyBusiness extends React.Component {
   constructor(props) {
@@ -10,7 +11,8 @@ class FindMyBusiness extends React.Component {
       address: '',
       phone: '',
       website: '',
-      cateogory: {}
+      cateogory: {}, 
+      formErrors: {},
     };
 
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -19,12 +21,23 @@ class FindMyBusiness extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    let errors = {}
     const formData = {};
     for (const field in this.refs) {
-      formData[field] = this.refs[field].value;
+      if (this.refs[field].value) {
+        formData[field] = this.refs[field].value;
+      }
+      else {
+        errors[field] = 'error';
+      }
     }
-
-    this.setState(formData);
+    if (!_.isEmpty(errors)) {
+      this.setState({formErrors: errors});
+    }
+    else {
+      formData['formErrors'] = {}
+      this.setState(formData);
+    }
   }
 
   handleChange(mapResult) {
@@ -39,7 +52,8 @@ class FindMyBusiness extends React.Component {
 
   render() {
     let renderMap = this.state.name && this.state.zip;
-    
+    let errors = !_.isEmpty(this.state.formErrors)
+
     return (
       <div className='entry'>
         <form onSubmit={this.handleSubmit}>
@@ -53,7 +67,10 @@ class FindMyBusiness extends React.Component {
           </label>
             <input type="submit" value="Submit" />
         </form>
-        { renderMap &&
+        { errors &&
+          <div className='errors'>There was an error in the form you submitted</div>
+        }
+        { renderMap && (!errors) &&
           <div>
             <GoogleMap name={this.state.name} zip={this.state.zip} resultsHandler={this.handleChange} />
             <h3>{this.state.name}</h3>
