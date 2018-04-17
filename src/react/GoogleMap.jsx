@@ -4,8 +4,7 @@ class GoogleMap extends React.Component {
 	constructor(props) {
     super(props);
     this.state = {
-      result: {}, 
-      query: {}
+      result: {}
     }
   }
 
@@ -33,7 +32,7 @@ class GoogleMap extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     let sameName = this.props.name === prevProps.name;
     let sameZip = this.props.zip === prevProps.zip;
-    
+
     if (!(sameName && sameZip)) {
       this.renderMap();
     }
@@ -52,8 +51,7 @@ class GoogleMap extends React.Component {
               return;
             }
             else {
-              this.getResults(result)
-              console.log('success')
+              this.getResults(result);
             }
           });
         }
@@ -61,7 +59,7 @@ class GoogleMap extends React.Component {
   }
 
   getResults(result) {
-    if (result && (result != this.state.result)) {
+    if (result && (result != this.state.result)) { // TODO remove this
       let address = result.formatted_address;
       this.geocoder.geocode({'address': address}, (results, status) => {
         if (status === 'OK') {
@@ -72,7 +70,7 @@ class GoogleMap extends React.Component {
           });
         }
       });
-      this.setState({result: result}, () => {
+      this.setState({result: result}, () => { // TODO remove from state
         this.props.resultsHandler(this.state.result)
       });
     }

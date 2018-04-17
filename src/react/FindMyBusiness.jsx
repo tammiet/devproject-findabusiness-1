@@ -1,6 +1,7 @@
 import React from 'react';
 import GoogleMap from './GoogleMap.jsx'
 import _ from 'lodash';
+import Clarifai from 'clarifai';
 
 class FindMyBusiness extends React.Component {
   constructor(props) {
@@ -8,11 +9,12 @@ class FindMyBusiness extends React.Component {
     this.state = {
       name: '',
       zip: '', 
-      address: '',
-      phone: '',
-      website: '',
+      address: 'none',
+      phone: 'none',
+      website: 'none',
       cateogory: {}, 
       formErrors: {},
+      photos: {}
     };
 
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -41,18 +43,54 @@ class FindMyBusiness extends React.Component {
   }
 
   handleChange(mapResult) {
-    this.setState({
-      address: mapResult.formatted_address,
-      name: mapResult.name,
-      category: mapResult.types,
-      phone: mapResult.formatted_phone_number,
-      website: mapResult.website
+    let photoPromise = [];
+    let photoObj = {};
+    let urls = [];
+
+    for (let i=0; i<5; i++) {
+      if (mapResult.photos[i]) {
+        let url = mapResult.photos[i].getUrl({maxHeight: 300});
+        urls.push(url)
+        photoPromise.push(this.predictImage(url))
+      }
+    }
+
+    Promise.all(photoPromise).then((photos) => {
+      urls.map((key, i) => {
+        photoObj[key] = photos[i];
+      });
+    }).then(() => {
+        this.setState({
+        address: mapResult.formatted_address,
+        name: mapResult.name,
+        category: mapResult.types,
+        phone: mapResult.formatted_phone_number,
+        website: mapResult.website, 
+        photos: photoObj
+      });
     });
+  }
+
+  predictImage(url) {
+    var app = new Clarifai.App(
+    'NO18sIhXk9nZDkAdVXNPSThzPXPI8wHn78vAncxe',
+    'c2vHENnTnNj6XdFkXCEWbG1g1oSdBmTqOTO44eP9'
+    );
+
+    // Predict the contents of an image by passing in a url
+    return app.models.predict(Clarifai.GENERAL_MODEL, url).then(
+      (response) => {
+        return response.outputs[0].data.concepts[0].name;
+      },
+      (err) => {console.error(err);
+      }
+    )
   }
 
   render() {
     let renderMap = this.state.name && this.state.zip;
     let errors = !_.isEmpty(this.state.formErrors)
+    // let photos = !_.isEmpty(this.state.photos)
 
     return (
       <div className='entry'>
@@ -73,11 +111,20 @@ class FindMyBusiness extends React.Component {
         { renderMap && (!errors) &&
           <div>
             <GoogleMap name={this.state.name} zip={this.state.zip} resultsHandler={this.handleChange} />
-            <h3>{this.state.name}</h3>
+            <h4>{this.state.name}</h4>
             <p>Address: {this.state.address}</p>
             <p>Phone: {this.state.phone}</p>
             <p>Website: {this.state.website}</p>
           </div>
+        }
+        { Object.keys(this.state.photos).map((key, i) => {
+          return (
+            <div key={i}>
+              <img src={key} />
+              <p>{this.state.photos[key]}</p>
+            </div>
+            )
+          })
         }
       </div>
     )
