@@ -62,6 +62,25 @@ module.exports = {
         ]
       },
       {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'sass-loader'
+            // options: {
+            //   includePaths: [
+            //     '~bootstrap-sass/assets/stylesheets'
+            //   ]
+            // }
+          }
+        ]
+      },
+      {
         test: /\.(png|woff|woff2|eot|ttf|svg)$/,
         use: [
           {
