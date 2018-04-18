@@ -2,6 +2,9 @@ import React from 'react';
 import GoogleMap from './GoogleMap.jsx'
 import _ from 'lodash';
 import Clarifai from 'clarifai';
+import ReactDOM from 'react-dom';
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 class FindMyBusiness extends React.Component {
   constructor(props) {
@@ -12,7 +15,7 @@ class FindMyBusiness extends React.Component {
       address: 'none',
       phone: 'none',
       website: 'none',
-      cateogory: {}, 
+      cateogory: '', 
       formErrors: {},
       photos: {}
     };
@@ -63,7 +66,7 @@ class FindMyBusiness extends React.Component {
         this.setState({
         address: mapResult.formatted_address,
         name: mapResult.name,
-        category: mapResult.types,
+        category: mapResult.types[0],
         phone: mapResult.formatted_phone_number,
         website: mapResult.website, 
         photos: photoObj
@@ -90,42 +93,61 @@ class FindMyBusiness extends React.Component {
   render() {
     let renderMap = this.state.name && this.state.zip;
     let errors = !_.isEmpty(this.state.formErrors)
-    // let photos = !_.isEmpty(this.state.photos)
 
     return (
-      <div className='entry'>
+      <div className='homepage'>
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Name:
+          <label className="text-input">
+            Name
             <input type="text" name="name" className="name" ref="name" />
           </label>
-          <label>
+          <label className="text-input">
             Zipcode
             <input type="text" name="zip" className="zip" ref="zip" />
           </label>
-            <input type="submit" value="Submit" />
+          <input className="submit-btn" type="submit" value="Submit" />
         </form>
         { errors &&
           <div className='errors'>There was an error in the form you submitted</div>
         }
         { renderMap && (!errors) &&
-          <div>
-            <GoogleMap name={this.state.name} zip={this.state.zip} resultsHandler={this.handleChange} />
-            <h4>{this.state.name}</h4>
-            <p>Address: {this.state.address}</p>
-            <p>Phone: {this.state.phone}</p>
-            <p>Website: {this.state.website}</p>
-          </div>
-        }
-        { Object.keys(this.state.photos).map((key, i) => {
-          return (
-            <div key={i}>
-              <img src={key} />
-              <p>{this.state.photos[key]}</p>
+          <div className = "results">
+            <div className="map-carousel">
+              <div className='google-map'>
+                <GoogleMap name={this.state.name} zip={this.state.zip} resultsHandler={this.handleChange} />
+                <div className="info">
+                <h5>{this.state.name}</h5>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td><p>Address: {this.state.address}</p></td>
+                      <td><p>Phone: {this.state.phone}</p></td>
+                    </tr>
+                    <tr>
+                      <td><p>Website: {this.state.website}</p></td>
+                      <td><p>Category: {this.state.category}</p></td>
+                    </tr> 
+                  </tbody>
+                </table>
             </div>
-            )
-          })
-        }
+              </div>
+              <div className="carousel-container">
+                <Carousel showArrows={true}>
+                  {
+                    Object.keys(this.state.photos).map((key, i) => {
+                    return (
+                      <div className="carousel-img-display" key={i}>
+                        <img className="carousel-img" src={key} style={{maxHeight:'21em'}}/>
+                        <p className="legend">{this.state.photos[key]}</p>
+                      </div>
+                      )
+                    })
+                  }
+                </Carousel>
+              </div>
+            </div>
+        </div>
+      }
       </div>
     )
   }

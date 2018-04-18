@@ -1,13 +1,6 @@
 import React from 'react';
 
 class GoogleMap extends React.Component {
-	constructor(props) {
-    super(props);
-    this.state = {
-      result: {}
-    }
-  }
-
   componentDidMount() {
     this.map = new google.maps.Map(this.refs.map, {
       center: {
@@ -59,21 +52,18 @@ class GoogleMap extends React.Component {
   }
 
   getResults(result) {
-    if (result && (result != this.state.result)) { // TODO remove this
-      let address = result.formatted_address;
-      this.geocoder.geocode({'address': address}, (results, status) => {
-        if (status === 'OK') {
-          this.map.setCenter(result.geometry.location);
-          var marker = new google.maps.Marker({
-            map: this.map,
-            position: result.geometry.location
-          });
-        }
-      });
-      this.setState({result: result}, () => { // TODO remove from state
-        this.props.resultsHandler(this.state.result)
-      });
-    }
+    let address = result.formatted_address;
+    this.geocoder.geocode({'address': address}, (results, status) => {
+      if (status === 'OK') {
+        this.map.setCenter(result.geometry.location);
+        var marker = new google.maps.Marker({
+          map: this.map,
+          position: result.geometry.location
+        });
+      }
+    });
+
+    this.props.resultsHandler(result);
   }
 
   render() {

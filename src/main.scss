@@ -2,7 +2,6 @@
 $icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
-// See? SCSS is here if you want it
 .example-header {
   text-align: center;
   .example-header-title {
@@ -14,13 +13,50 @@ $icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
     height: 50px;
   }
 }
-
-.map {
-	width: 500px;
-  height: 300px;
-  border: '1px solid black';
-}
-
-.errors {
-  color: red;
+.homepage {
+  display: flex;
+  flex-direction: column;
+  form {
+    display: flex;
+    justify-content: center;
+    .text-input {
+      padding: 5px;
+    }
+  }
+  .errors {
+    color: red;
+  }
+  .results {
+    display: flex;
+    flex-direction: column;
+    .info {
+      padding-left: 20px;
+      p {
+        font-size: 12px;
+      }
+      table {
+        width: 100%;
+      }
+    }
+    .map-carousel {
+      display: flex;
+      flex-direction: row;
+      height: 80%;
+      .google-map {
+        width: 50%;
+        .map {
+          height: 21em;
+          border: '1px solid black';
+        }
+      }
+      .carousel-container {
+        width: 50%;
+        .carousel.carousel-slider {
+          .slider.animated .slide .carousel-img {
+            width: auto !important;
+          }
+        }
+      }
+    }
+  }
 }
